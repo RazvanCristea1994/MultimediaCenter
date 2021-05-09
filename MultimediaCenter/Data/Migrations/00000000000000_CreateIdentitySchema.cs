@@ -1,9 +1,9 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore.Migrations;
+﻿using Microsoft.EntityFrameworkCore.Migrations;
+using System;
 
-namespace MultimediaCenter.Migrations
+namespace MultimediaCenter.Data.Migrations
 {
-    public partial class InitialCreate : Migration
+    public partial class CreateIdentitySchema : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
