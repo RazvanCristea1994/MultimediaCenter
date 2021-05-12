@@ -14,9 +14,6 @@ namespace MultimediaCenter.Models
         public string Title { get; set; }
         [Required]
         public string Description { get; set; }
-        [Required]
-        public MovieGenre Genre { get; set; }
-        
         [MinLength(5)]
         public int Duration { get; set; }
         [MinLength(1990)]
@@ -26,6 +23,9 @@ namespace MultimediaCenter.Models
         public DateTime AddedDate { get; set; }
         [Range(1, 10)]
         public int Rating { get; set; }
+        [Required]
         public bool Watched { get; set; }
+        [Required]
+        public MovieGenre Genre { get; set; }
     }
 }
