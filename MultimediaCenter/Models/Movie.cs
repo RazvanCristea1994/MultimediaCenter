@@ -25,7 +25,7 @@ namespace MultimediaCenter.Models
         public int Rating { get; set; }
         [Required]
         public bool Watched { get; set; }
-        [Required]
-        public MovieGenre Genre { get; set; }
+        //[Required]
+        //public MovieGenre Genre { get; set; }
     }
 }

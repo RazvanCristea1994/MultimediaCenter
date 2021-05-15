@@ -47,12 +47,17 @@ namespace MultimediaCenter.Controllers
         {
             var movie = await _context.Movies.FindAsync(id);
 
+            if (movie == null)
+            {
+                return NotFound();
+            }
+
             var movieViewModel = new MovieViewModel
             {
                 Id = movie.Id,
                 Title = movie.Title,
                 Description = movie.Description,
-                Genre = movie.Genre,
+                //Genre = movie.Genre,
                 Duration = movie.Duration,
                 YearOfRelease = movie.YearOfRelease,
                 Director = movie.Director,
@@ -60,11 +65,6 @@ namespace MultimediaCenter.Controllers
                 Rating = movie.Rating,
                 Watched = movie.Watched
             };
-
-            if (movie == null)
-            {
-                return NotFound();
-            }
 
             return movieViewModel;
         }

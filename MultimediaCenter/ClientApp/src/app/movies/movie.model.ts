@@ -8,5 +8,4 @@ export class Movie {
   addedDate: string;
   rating: number;
   watched: string;
-  genre: string;
 }
