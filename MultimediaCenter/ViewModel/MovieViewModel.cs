@@ -19,5 +19,10 @@ namespace MultimediaCenter.ViewModel
         public int Rating { get; set; }
         public bool Watched { get; set; }
         public MovieGenre Genre { get; set; }
+
+        public enum MovieGenre
+        {
+            Action, Comedy, Horror, Thriller
+        }
     }
 }

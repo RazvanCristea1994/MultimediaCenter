@@ -51,7 +51,15 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Remove="ClientApp\src\app\movies\movies-list\movies-list.component.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
     <TypeScriptCompile Remove="ClientApp\src\app\movies\movie.model.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Migrations\" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">

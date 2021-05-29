@@ -52,7 +52,14 @@ namespace MultimediaCenter
                 configuration.RootPath = "ClientApp/dist";
             });
 
+            services.AddControllers()
+                            .AddJsonOptions(options =>
+                            {
+                                options.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+                            });
+
             
+
             services.AddSwaggerGen(c =>
             {
                 c.SwaggerDoc("v1", new OpenApiInfo

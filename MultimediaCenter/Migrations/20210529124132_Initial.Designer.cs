@@ -10,8 +10,8 @@ using MultimediaCenter.Data;
 namespace MultimediaCenter.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210509190424_MovieMigration")]
-    partial class MovieMigration
+    [Migration("20210529124132_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

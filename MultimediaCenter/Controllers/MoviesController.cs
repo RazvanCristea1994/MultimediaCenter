@@ -52,13 +52,13 @@ namespace MultimediaCenter.Controllers
                 Id = movie.Id,
                 Title = movie.Title,
                 Description = movie.Description,
-                Genre = movie.Genre,
                 Duration = movie.Duration,
                 YearOfRelease = movie.YearOfRelease,
                 Director = movie.Director,
                 AddedDate = movie.AddedDate,
                 Rating = movie.Rating,
-                Watched = movie.Watched
+                Watched = movie.Watched,
+                Genre = (MovieViewModel.MovieGenre)movie.Genre
             };
 
             if (movie == null)

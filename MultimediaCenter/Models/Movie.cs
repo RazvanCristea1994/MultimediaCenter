@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace MultimediaCenter.Models
@@ -14,9 +15,7 @@ namespace MultimediaCenter.Models
         public string Title { get; set; }
         [Required]
         public string Description { get; set; }
-        [MinLength(5)]
         public int Duration { get; set; }
-        [MinLength(1990)]
         public int YearOfRelease { get; set; }
         [Required]
         public string Director { get; set; }
@@ -25,7 +24,13 @@ namespace MultimediaCenter.Models
         public int Rating { get; set; }
         [Required]
         public bool Watched { get; set; }
-        [Required]
+       
         public MovieGenre Genre { get; set; }
+
+        [JsonConverter(typeof(JsonStringEnumConverter))]
+        public enum MovieGenre
+        {
+            Action, Comedy, Horror, Thriller
+        }
     }
 }
