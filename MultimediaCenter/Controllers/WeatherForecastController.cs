@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace MultimediaCenter.Controllers
 {
-    [Authorize]
+    [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
     [ApiController]
     [Route("api/[controller]")]
     public class WeatherForecastController : ControllerBase

@@ -3,15 +3,17 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MultimediaCenter.Data;
 
 namespace MultimediaCenter.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210604185256_AddOrderDateTimeToOrder")]
+    partial class AddOrderDateTimeToOrder
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -344,9 +346,6 @@ namespace MultimediaCenter.Migrations
                     b.Property<int>("Genre")
                         .HasColumnType("int");
 
-                    b.Property<int?>("OrderId")
-                        .HasColumnType("int");
-
                     b.Property<int>("Rating")
                         .HasColumnType("int");
 
@@ -361,29 +360,7 @@ namespace MultimediaCenter.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderId");
-
                     b.ToTable("Movies");
-                });
-
-            modelBuilder.Entity("MultimediaCenter.Models.Order", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int")
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<DateTime>("OrderDateTime")
-                        .HasColumnType("datetime2");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("ApplicationUserId");
-
-                    b.ToTable("Orders");
                 });
 
             modelBuilder.Entity("MultimediaCenter.Models.UserReview", b =>
@@ -463,22 +440,6 @@ namespace MultimediaCenter.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("MultimediaCenter.Models.Movie", b =>
-                {
-                    b.HasOne("MultimediaCenter.Models.Order", null)
-                        .WithMany("Movies")
-                        .HasForeignKey("OrderId");
-                });
-
-            modelBuilder.Entity("MultimediaCenter.Models.Order", b =>
-                {
-                    b.HasOne("MultimediaCenter.Models.ApplicationUser", "ApplicationUser")
-                        .WithMany()
-                        .HasForeignKey("ApplicationUserId");
-
-                    b.Navigation("ApplicationUser");
-                });
-
             modelBuilder.Entity("MultimediaCenter.Models.UserReview", b =>
                 {
                     b.HasOne("MultimediaCenter.Models.Movie", "Movie")
@@ -493,11 +454,6 @@ namespace MultimediaCenter.Migrations
             modelBuilder.Entity("MultimediaCenter.Models.Movie", b =>
                 {
                     b.Navigation("UserReviews");
-                });
-
-            modelBuilder.Entity("MultimediaCenter.Models.Order", b =>
-                {
-                    b.Navigation("Movies");
                 });
 #pragma warning restore 612, 618
         }
