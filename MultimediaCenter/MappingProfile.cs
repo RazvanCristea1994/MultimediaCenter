@@ -14,10 +14,15 @@ namespace MultimediaCenter
         public MappingProfile()
         {
             CreateMap<Movie, MovieViewModel>().ReverseMap();
+            CreateMap<Movie, MovieWithReviewsViewModel>().ReverseMap();
+
             CreateMap<UserReview, ReviewViewModel>().ReverseMap();
-            CreateMap<Movie, MovieWithReviewsViewModel>();
+
             CreateMap<Order, OrdersForUserResponse>().ReverseMap();
+
             CreateMap<ApplicationUser, ApplicationUserViewModel>().ReverseMap();
+
+            CreateMap<Favourites, FavouritesForUserResponse>().ReverseMap();
         }
     }
 }

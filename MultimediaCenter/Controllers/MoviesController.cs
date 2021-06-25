@@ -29,8 +29,31 @@ namespace MultimediaCenter.Controllers
             _mapper = mapper;
         }
 
-        // POST: api/Movies
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Adds a movie
+        /// </summary>
+        /// <url>
+        /// https://localhost:5001/api/Movies/
+        /// </url>
+        /// <body>
+        /// {
+        ///"title": "Friends",
+        ///"description": "The one that is the best",
+        ///"duration": 25,
+        ///"yearOfRelease": 1994,
+        ///"director": "?????",
+        ///"addedDate": "2019-05-22T11:10:21",
+        ///"rating": 5,
+        ///"watched": true,
+        ///"genre": "Comedy",
+        ///"userReviews": []
+        ///}
+        /// </body>
+        /// <param name="movieRequest"></param>
+        /// <returns>
+        /// 200 if successful
+        /// 400 if error
+        /// </returns>
         [HttpPost]
         public async Task<ActionResult<MovieViewModel>> PostMovie(MovieViewModel movieRequest)
         {
@@ -41,8 +64,28 @@ namespace MultimediaCenter.Controllers
             return CreatedAtAction("GetMovie", new { id = movie.Id }, movie);
         }
 
+        /// <summary>
+        /// Adds a review to a movie
+        /// </summary>
+        /// <url>
+        /// https://localhost:5001/api/Movies/1/user-reviews
+        /// </url>
+        /// <body>
+        /// {
+        ///"content": "destul de bun",
+        ///"stars": 3,
+        ///"dateTime": "2021-05-15T10:41:32",
+        ///"movieId": 1
+        ///}
+        /// </body>
+        /// <param name="id"></param>
+        /// <param name="userReview"></param>
+        /// <returns>
+        /// 200 if successful
+        /// 400 if error
+        /// </returns>
         [HttpPost("{id}/user-reviews")]
-        public IActionResult PostReviewForMovie(int id, UserReview userReview)
+        public IActionResult PostReviewForMovie(int id, ReviewViewModel userReview)
         {
             var movie = _context.Movies
                 .Where(m => m.Id == id)
@@ -54,51 +97,136 @@ namespace MultimediaCenter.Controllers
                 return NotFound();
             }
 
-            movie.UserReviews.Add(userReview);
+            movie.UserReviews.Add(_mapper.Map<UserReview>(userReview));
             _context.Entry(movie).State = EntityState.Modified;
             _context.SaveChanges();
 
             return Ok();
         }
 
-        // GET: api/Movies
+        /// <summary>
+        /// Retrieves a list of movies filtered by the given year or all the movies if a year is not provided. The list includes the reviews 
+        /// </summary>
+        /// <url>
+        /// https://localhost:5001/api/movies
+        /// </url>
+        /// <param name="minYear"></param>
+        /// <returns>A list of MovieWithReviewsViewModel</returns>
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<MovieViewModel>>> GetMovies(int? minYear)
+        public async Task<ActionResult<IEnumerable<MovieWithReviewsViewModel>>> GetMovies(int? minYear)
         {
             if (minYear == null)
             {
-                var movies1 = await _context.Movies.ToListAsync();
-                return _mapper.Map<List<Movie>, List<MovieViewModel>>(movies1);
+                var unfilteredMovies = await _context.Movies
+                    .Include(m => m.UserReviews)
+                    .Include(m => m.Favourites)
+                    .ToListAsync();
+                return _mapper.Map<List<MovieWithReviewsViewModel>>(unfilteredMovies);
             }
 
-            var movies = await _context.Movies.Where(m => m.YearOfRelease >= minYear).ToListAsync();
-            return _mapper.Map<List<Movie>,  List<MovieViewModel>>(movies);
+            var movies = await _context.Movies
+                .Where(m => m.YearOfRelease >= minYear)
+                .Include(m => m.UserReviews)
+                .Include(m => m.Favourites)
+                .ToListAsync();
+            return _mapper.Map<List<MovieWithReviewsViewModel>>(movies);
         }
-         
-        // GET: api/Movies/5
+
+        /// <summary>
+        /// Retrieve the movie with the given Id
+        /// </summary>
+        /// <url>
+        /// https://localhost:5001/api/movies/5
+        /// </url>
+        /// <param name="id"></param>
+        /// <returns>Returns a MovieViewModel</returns>
         [HttpGet("{id}")]
-        public async Task<ActionResult<MovieViewModel>> GetMovie(int id)
+        public async Task<ActionResult<MovieWithReviewsViewModel>> GetMovie(int id)
         {
-            var movie = await _context.Movies.FindAsync(id);
+            var movie = await _context.Movies
+                .Include(m => m.UserReviews)
+                .Include(m => m.Favourites)
+                .SingleOrDefaultAsync(m => m.Id == id);
             if (movie == null)
             {
                 return NotFound();
             }
 
-            return _mapper.Map<MovieViewModel>(movie);
+            return _mapper.Map<MovieWithReviewsViewModel>(movie);
         }
 
+        /// <summary>
+        /// Retrieves a list of movies filtered by the interval ordered descendingly by the year of release
+        /// </summary>
+        /// <url>
+        /// https://localhost:5001/api/Movies/filter/2010_2022
+        /// </url>
+        /// <param name="from"></param>
+        /// <param name="to"></param>
+        /// <returns>A list of MovieViewModel</returns>
         [HttpGet]
         [Route("filter/{from}_{to}")]
-        public ActionResult<IEnumerable<Movie>> FilterMovies(int from, int to)
+        public ActionResult<IEnumerable<MovieViewModel>> FilterMovies(int from, int to)
         {
             var movies = _context.Movies.Where(m => m.YearOfRelease >= from && m.YearOfRelease <= to).OrderByDescending(m => m.YearOfRelease).ToList();
 
-            return movies;
+            return _mapper.Map<List<MovieViewModel>>(movies);
         }
 
-        // PUT: api/Movies/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        /// <summary>
+        /// Get the list of reviews of the movie with specified id
+        /// </summary>
+        /// <url>
+        /// https://localhost:5001/api/Movies/1/user-reviews
+        /// </url>
+        /// <param name="id"></param>
+        /// <returns>A list of MovieWithReviewsViewModel</returns>
+        [HttpGet("{id}/user-reviews")]
+        public ActionResult<IEnumerable<MovieWithReviewsViewModel>> GetReviewForMovie(int id)
+        {
+            if (!MovieExists(id))
+            {
+                return NotFound();
+            }
+
+            return _context.Movies.Where(m => m.Id == id)
+                .Include(m => m.UserReviews)
+                .Select(m => _mapper.Map<MovieWithReviewsViewModel>(m))
+                .ToList();
+        }
+
+        private bool MovieExists(int id)
+        {
+            return _context.Movies.Any(e => e.Id == id);
+        }
+
+        /// <summary>
+        /// Edit a movie
+        /// </summary>
+        /// <url>
+        /// https://localhost:5001/api/Movies/5
+        /// </url>
+        /// <body>
+        /// {
+        /// "id": 5,
+        /// "title": "The best one",
+        ///"description": "bbbbbbbbbb",
+        ///"duration": 10,
+        ///"yearOfRelease": 2019,
+        ///"director": "ccccc",
+        ///"addedDate": "2020-05-22T11:10:21",
+        ///"rating": 3,
+        ///"watched": true,
+        ///"genre": "Horror"
+        /// }
+        /// </body>
+        /// <param name="id"></param>
+        /// <param name="movie"></param>
+        /// <returns>
+        /// 204 Response if successful
+        /// 400 If the Id does not match
+        /// 404 If the movie does not exist in the DB
+        /// </returns>
         [HttpPut("{id}")]
         public async Task<IActionResult> PutMovie(int id, MovieViewModel movie)
         {
@@ -128,9 +256,24 @@ namespace MultimediaCenter.Controllers
             return NoContent();
         }
 
-        // PUT: api/Movies/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
+        /// <summary>
+        /// Edit a review
+        /// </summary>
+        /// <url>
+        /// https://localhost:5001/api/Movies/1/user-review/2
+        /// </url>
+        /// <body>
+        ///{
+        ///"id": 2,
+        ///"content": "destul de bun",
+        ///"stars": 5,
+        ///"dateTime": "2021-05-15T11:20:20"
+        ///}
+        /// </body>
+        /// <param name="idReview"></param>
+        /// <param name="review"></param>
+        /// <returns></returns>
+        [HttpPut("{id}/user-review/{idReview}")] // X
         public async Task<IActionResult> PutReview(int idReview, ReviewViewModel review)
         {
             if (idReview != review.Id)
@@ -146,7 +289,7 @@ namespace MultimediaCenter.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!MovieExists(idReview))
+                if (!ReviewExists(idReview))
                 {
                     return NotFound();
                 }
@@ -159,7 +302,22 @@ namespace MultimediaCenter.Controllers
             return NoContent();
         }
 
-        // DELETE: api/Movies/5
+        private bool ReviewExists(int id)
+        {
+            return _context.UserReviews.Any(e => e.Id == id);
+        }
+
+        /// <summary>
+        /// Deletes a movie
+        /// </summary>
+        /// <url>
+        /// https://localhost:5001/api/Movies/6
+        /// </url>
+        /// <param name="id"></param>
+        /// <returns>
+        /// 204 if successful
+        /// 404 if the movie does not exist
+        /// </returns>
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteMovie(int id)
         {
@@ -175,8 +333,18 @@ namespace MultimediaCenter.Controllers
             return NoContent();
         }
 
-        // DELETE: api/Movies/5
-        [HttpDelete("{id}/Reviews/{reviewId}")]
+        /// <summary>
+        /// Deletes a review of a movie
+        /// </summary>
+        /// <url>
+        /// https://localhost:5001/api/Movies/1/user-review/5
+        /// </url>
+        /// <param name="reviewId"></param>
+        /// <returns>
+        /// 204 if successful
+        /// 404 if the movie does not exist
+        /// </returns>
+        [HttpDelete("{id}/user-review/{reviewId}")]
         public async Task<IActionResult> DeleteReview(int reviewId)
         {
             var review = await _context.UserReviews.FindAsync(reviewId);
@@ -189,25 +357,6 @@ namespace MultimediaCenter.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
-        }
-
-        [HttpGet("{id}/user-reviews")]
-        public ActionResult<IEnumerable<MovieWithReviewsViewModel>> GetReviewForMovie(int id)
-        {
-            if (!MovieExists(id))
-            {
-                return NotFound();
-            }
-
-            return _context.Movies.Where(m => m.Id == id)
-                .Include(m => m.UserReviews)
-                .Select(m => _mapper.Map<MovieWithReviewsViewModel>(m))
-                .ToList();
-        }
-
-        private bool MovieExists(int id)
-        {
-            return _context.Movies.Any(e => e.Id == id);
         }
     }
 }

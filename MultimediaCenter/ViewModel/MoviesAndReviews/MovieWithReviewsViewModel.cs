@@ -24,5 +24,6 @@ namespace MultimediaCenter.ViewModel
         }
 
         public IEnumerable<ReviewViewModel> UserReviews { get; set; }
+        public IEnumerable<FavouritesForUserResponse> Favourites { get; set; }
     }
 }

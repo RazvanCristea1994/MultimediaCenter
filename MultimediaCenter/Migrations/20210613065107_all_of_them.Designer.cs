@@ -10,8 +10,8 @@ using MultimediaCenter.Data;
 namespace MultimediaCenter.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20210605032733_Orders")]
-    partial class Orders
+    [Migration("20210613065107_all_of_them")]
+    partial class all_of_them
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -20,6 +20,21 @@ namespace MultimediaCenter.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("ProductVersion", "5.0.5")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+            modelBuilder.Entity("FavouritesMovie", b =>
+                {
+                    b.Property<int>("FavouritesId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("MoviesId")
+                        .HasColumnType("int");
+
+                    b.HasKey("FavouritesId", "MoviesId");
+
+                    b.HasIndex("MoviesId");
+
+                    b.ToTable("FavouritesMovie");
+                });
 
             modelBuilder.Entity("IdentityServer4.EntityFramework.Entities.DeviceFlowCodes", b =>
                 {
@@ -259,6 +274,21 @@ namespace MultimediaCenter.Migrations
                     b.ToTable("AspNetUserTokens");
                 });
 
+            modelBuilder.Entity("MovieOrder", b =>
+                {
+                    b.Property<int>("MoviesId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("OrdersId")
+                        .HasColumnType("int");
+
+                    b.HasKey("MoviesId", "OrdersId");
+
+                    b.HasIndex("OrdersId");
+
+                    b.ToTable("MovieOrder");
+                });
+
             modelBuilder.Entity("MultimediaCenter.Models.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -324,6 +354,23 @@ namespace MultimediaCenter.Migrations
                     b.ToTable("AspNetUsers");
                 });
 
+            modelBuilder.Entity("MultimediaCenter.Models.Favourites", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Favourites");
+                });
+
             modelBuilder.Entity("MultimediaCenter.Models.Movie", b =>
                 {
                     b.Property<int>("Id")
@@ -346,9 +393,6 @@ namespace MultimediaCenter.Migrations
                     b.Property<int>("Genre")
                         .HasColumnType("int");
 
-                    b.Property<int?>("OrderId")
-                        .HasColumnType("int");
-
                     b.Property<int>("Rating")
                         .HasColumnType("int");
 
@@ -363,8 +407,6 @@ namespace MultimediaCenter.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("OrderId");
-
                     b.ToTable("Movies");
                 });
 
@@ -375,15 +417,15 @@ namespace MultimediaCenter.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("ApplicationUserId")
-                        .HasColumnType("nvarchar(450)");
-
                     b.Property<DateTime>("OrderDateTime")
                         .HasColumnType("datetime2");
 
+                    b.Property<string>("UserId")
+                        .HasColumnType("nvarchar(450)");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ApplicationUserId");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Orders");
                 });
@@ -412,6 +454,21 @@ namespace MultimediaCenter.Migrations
                     b.HasIndex("MovieId");
 
                     b.ToTable("UserReviews");
+                });
+
+            modelBuilder.Entity("FavouritesMovie", b =>
+                {
+                    b.HasOne("MultimediaCenter.Models.Favourites", null)
+                        .WithMany()
+                        .HasForeignKey("FavouritesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("MultimediaCenter.Models.Movie", null)
+                        .WithMany()
+                        .HasForeignKey("MoviesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
@@ -465,20 +522,37 @@ namespace MultimediaCenter.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("MultimediaCenter.Models.Movie", b =>
+            modelBuilder.Entity("MovieOrder", b =>
                 {
+                    b.HasOne("MultimediaCenter.Models.Movie", null)
+                        .WithMany()
+                        .HasForeignKey("MoviesId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("MultimediaCenter.Models.Order", null)
-                        .WithMany("Movies")
-                        .HasForeignKey("OrderId");
+                        .WithMany()
+                        .HasForeignKey("OrdersId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("MultimediaCenter.Models.Favourites", b =>
+                {
+                    b.HasOne("MultimediaCenter.Models.ApplicationUser", "User")
+                        .WithMany("Favourites")
+                        .HasForeignKey("UserId");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MultimediaCenter.Models.Order", b =>
                 {
-                    b.HasOne("MultimediaCenter.Models.ApplicationUser", "ApplicationUser")
-                        .WithMany()
-                        .HasForeignKey("ApplicationUserId");
+                    b.HasOne("MultimediaCenter.Models.ApplicationUser", "User")
+                        .WithMany("Orders")
+                        .HasForeignKey("UserId");
 
-                    b.Navigation("ApplicationUser");
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("MultimediaCenter.Models.UserReview", b =>
@@ -492,14 +566,16 @@ namespace MultimediaCenter.Migrations
                     b.Navigation("Movie");
                 });
 
+            modelBuilder.Entity("MultimediaCenter.Models.ApplicationUser", b =>
+                {
+                    b.Navigation("Favourites");
+
+                    b.Navigation("Orders");
+                });
+
             modelBuilder.Entity("MultimediaCenter.Models.Movie", b =>
                 {
                     b.Navigation("UserReviews");
-                });
-
-            modelBuilder.Entity("MultimediaCenter.Models.Order", b =>
-                {
-                    b.Navigation("Movies");
                 });
 #pragma warning restore 612, 618
         }

@@ -16,6 +16,7 @@ namespace MultimediaCenter.Data
         public DbSet<UserReview> UserReviews { get; set; }
         public DbSet<ApplicationUser> ApplicationUsers { get; set; }
         public DbSet<Order> Orders { get; set; }
+        public DbSet<Favourites> Favourites { get; set; }
         public ApplicationDbContext(
             DbContextOptions options,
             IOptions<OperationalStoreOptions> operationalStoreOptions) : base(options, operationalStoreOptions)

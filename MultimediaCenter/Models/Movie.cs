@@ -16,7 +16,7 @@ namespace MultimediaCenter.Models
         public int YearOfRelease { get; set; }
         public string Director { get; set; }
         public DateTime AddedDate { get; set; }
-        public int Rating { get; set; }
+        public int? Rating { get; set; }
         public bool Watched { get; set; }
        
         public MovieGenre Genre { get; set; }
@@ -28,5 +28,7 @@ namespace MultimediaCenter.Models
         }
 
         public List<UserReview> UserReviews { get; set; }
+        public List<Favourites> Favourites { get; set; }
+        public List<Order> Orders { get; set; }
     }
 }

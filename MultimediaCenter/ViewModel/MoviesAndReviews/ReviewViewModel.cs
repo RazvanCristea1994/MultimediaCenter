@@ -11,5 +11,6 @@ namespace MultimediaCenter.ViewModel
         public String Content { get; set; }
         public int Stars { get; set; }
         public DateTime DateTime { get; set; }
+        public int MovieId { get; set; }
     }
 }

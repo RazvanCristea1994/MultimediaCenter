@@ -47,6 +47,7 @@ namespace MultimediaCenter.Controllers
                 UserName = registerRequest.Email,
                 SecurityStamp = Guid.NewGuid().ToString()
             };
+
             var result = await _userManager.CreateAsync(user, registerRequest.Password);
             if (result.Succeeded)
             {
@@ -63,6 +64,7 @@ namespace MultimediaCenter.Controllers
             var toConfirm = _context.ApplicationUsers
                 .Where(u => u.Email == confirmUserRequest.Email && u.SecurityStamp == confirmUserRequest.ConfirmationToken)
                 .FirstOrDefault();
+
             if (toConfirm != null)
             {
                 toConfirm.EmailConfirmed = true;
