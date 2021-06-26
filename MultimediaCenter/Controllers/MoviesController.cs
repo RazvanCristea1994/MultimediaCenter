@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -55,6 +56,7 @@ namespace MultimediaCenter.Controllers
         /// 400 if error
         /// </returns>
         [HttpPost]
+        [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
         public async Task<ActionResult<MovieViewModel>> PostMovie(MovieViewModel movieRequest)
         {
             Movie movie = _mapper.Map<Movie>(movieRequest);
@@ -182,17 +184,20 @@ namespace MultimediaCenter.Controllers
         /// <param name="id"></param>
         /// <returns>A list of MovieWithReviewsViewModel</returns>
         [HttpGet("{id}/user-reviews")]
-        public ActionResult<IEnumerable<MovieWithReviewsViewModel>> GetReviewForMovie(int id)
+        public async Task<ActionResult<MovieWithReviewsViewModel>> GetReviewsForMovie(int id)
         {
             if (!MovieExists(id))
             {
                 return NotFound();
             }
 
-            return _context.Movies.Where(m => m.Id == id)
-                .Include(m => m.UserReviews)
-                .Select(m => _mapper.Map<MovieWithReviewsViewModel>(m))
-                .ToList();
+            var movie = await _context.Movies.Where(m => m.Id == id).FirstOrDefaultAsync();
+            var comments = await _context.UserReviews.Where(r => r.MovieId == id).ToListAsync();
+
+            var result = _mapper.Map<MovieWithReviewsViewModel>(movie);
+            result.UserReviews = _mapper.Map<List<UserReview>, List<ReviewViewModel>>(comments);
+
+            return result;
         }
 
         private bool MovieExists(int id)
@@ -228,6 +233,7 @@ namespace MultimediaCenter.Controllers
         /// 404 If the movie does not exist in the DB
         /// </returns>
         [HttpPut("{id}")]
+        [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
         public async Task<IActionResult> PutMovie(int id, MovieViewModel movie)
         {
             if (id != movie.Id)
@@ -319,6 +325,7 @@ namespace MultimediaCenter.Controllers
         /// 404 if the movie does not exist
         /// </returns>
         [HttpDelete("{id}")]
+        [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
         public async Task<IActionResult> DeleteMovie(int id)
         {
             var movie = await _context.Movies.FindAsync(id);
@@ -345,6 +352,7 @@ namespace MultimediaCenter.Controllers
         /// 404 if the movie does not exist
         /// </returns>
         [HttpDelete("{id}/user-review/{reviewId}")]
+        [Authorize(AuthenticationSchemes = "Identity.Application,Bearer")]
         public async Task<IActionResult> DeleteReview(int reviewId)
         {
             var review = await _context.UserReviews.FindAsync(reviewId);
